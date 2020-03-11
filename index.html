@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emi Calculator</title>
+</head>
+
+<body>
+
+
+    <div class="container m-5 p-5">
+        <div class="card bg-light mb-3">
+            <div class="card-header">EMI Calculator</div>
+            <div class="card-body">
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="total-principal" placeholder="Principal (P): $">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="rate-of-interest"
+                            placeholder="Rate (R): % per year">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="time-period" placeholder="Time (t):(no of months)">
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="calculateEmi()">Calculate EMI</button>
+                </form>
+            </div>
+        </div>
+        <div id="statusMessage" style="display: none;" class="p-3 mb-2 bg-info text-white"></div>
+        <table id="table" class="table" style="display: none;">
+            <thead>
+                <tr>
+                    <th scope="col">Payment No</th>
+                    <th scope="col">Payment Amount</th>
+                    <th scope="col">Principal Amount Paid</th>
+                    <th scope="col">Intrest Amount Paid</th>
+                    <th scope="col">Loan Outstanding Balance</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+            </tbody>
+        </table>
+
+    </div>
+    <script>
+        // let baseURL = "http://localhost:3000/api/calculateEmi";
+        let baseURL = "http://localhost:9999/EMI/getEmiList";
+
+        function calculateEmi() {
+            let totalPrincipal = +parseFloat($("#total-principal").val());
+            let rateOfInterest = +parseFloat($("#rate-of-interest").val());
+            let timePeriod = +parseFloat($("#time-period").val());
+            let requestBody = {
+                totalPrincipal: totalPrincipal,
+                rateOfInterest: rateOfInterest,
+                timePeriod: timePeriod
+            };
+            $.post(baseURL, requestBody, function (response) {
+                console.log(response);
+                $('input').val("");
+                $("#statusMessage").text(response.statusMessage);
+                $("#statusMessage").show();
+                $("#tbody>tr").remove();
+                if (response.paymentsList && response.paymentsList.length > 0) {
+                    response.paymentsList.forEach((payment, index) => $("#tbody").append(
+                        `<tr>
+                            <th scope="row">${index + 1}</th>
+                            <td>${payment.paymentAmount}</td>
+                            <td>${payment.principalAmountPaid}</td>
+                            <td>${payment.intrestAmountPaid}</td>
+                            
+                            <td>${payment.loanOutstanding}</td>
+                        </tr>`
+                    ));
+                    $('#table').show();
+                }else {
+                    $('#table').hide();
+                }
+            });
+        }
+    </script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+</body>
+
+</html>
